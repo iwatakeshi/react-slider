@@ -98,7 +98,7 @@ function Slider({
       offset: index - slide,
     }));
     onSlideChange(slide);
-  }, [slide, setSpringProps, onSlideChange, dragging]);
+  }, [slide, setSpringProps, onSlideChange]);
 
   // Effect for autosliding
 
