@@ -1,11 +1,5 @@
-/** @jsxRuntime classic */
-/** @jsx jsx */
-import { css, jsx } from '@emotion/react';
-import { HTMLAttributes, ReactNode } from 'react';
-
-export interface SliderControlProps extends HTMLAttributes<HTMLDivElement> {
-  children: ReactNode;
-}
+import { css } from '@emotion/react';
+import styled from '@emotion/styled';
 
 const baseStyle = css`
   top: calc(50% - 20px);
@@ -18,20 +12,11 @@ const baseStyle = css`
   z-index: 2;
 `;
 
-export const leftStyle = css`
+export const LeftSliderControl = styled.div`
   ${baseStyle}
   left: 20px;
 `;
-
-export const rightStyle = css`
+export const RightSliderControl = styled.div`
   ${baseStyle}
   right: 20px;
 `;
-
-export function LeftSliderControl(props: SliderControlProps) {
-  return <div css={leftStyle} {...props} />;
-}
-
-export function RightSliderControl(props: SliderControlProps) {
-  return <div css={rightStyle} {...props} />;
-}

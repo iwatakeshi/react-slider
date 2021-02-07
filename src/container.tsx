@@ -1,25 +1,13 @@
-/** @jsxRuntime classic */
-/** @jsx jsx */
-import { HTMLAttributes, ReactNode } from 'react';
-import { css, jsx } from '@emotion/react';
+import styled from '@emotion/styled';
 
-export interface ContainerProps extends HTMLAttributes<HTMLDivElement> {
-  children: ReactNode;
-}
+const Container = styled.div`
+  position: relative;
+  height: 100%;
+  min-height: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+`;
 
-export default function Container(props: ContainerProps) {
-  return (
-    <div
-      css={css`
-        position: relative;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        position: relative;
-        overflow: hidden;
-        margin: auto 0;
-      `}
-      {...props}
-    />
-  );
-}
+export default Container;
