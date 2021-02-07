@@ -151,7 +151,7 @@ function Slider({
     ));
 
   return (
-    <Wrapper ref={ref as any}>
+    <Wrapper ref={ref as any} {...props}>
       <Container>
         {left && (
           <LeftSliderControl onClick={previous}>{left}</LeftSliderControl>
