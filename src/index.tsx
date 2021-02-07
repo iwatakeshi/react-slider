@@ -42,7 +42,7 @@ export interface SliderProps<T = HTMLDivElement> extends HTMLAttributes<T> {
  */
 
 function Slider({
-  interval = 1000,
+  interval = 1000 * 5,
   autoplay = false,
   index: activeIndex = 0,
   slidesAtOnce = 1,
