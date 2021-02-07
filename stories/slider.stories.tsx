@@ -15,6 +15,13 @@ const meta: Meta = {
   parameters: {
     controls: { expanded: true },
   },
+  decorators: [
+    (Story: Story<SliderProps>) => (
+      <div style={{ width: '100%', height: '100vh' }}>
+        <Story />
+      </div>
+    ),
+  ],
 };
 
 export default meta;

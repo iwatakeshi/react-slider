@@ -12,6 +12,7 @@ import { LeftSliderControl, RightSliderControl } from './control';
 import useGestureBinding from './hooks/use-gesture-binding';
 import useInterval from './hooks/use-interval';
 import Slide from './slide';
+import Wrapper from './wrapper';
 
 export interface SliderProps<T = HTMLDivElement> extends HTMLAttributes<T> {
   /** The active index in the slider. */
@@ -24,7 +25,6 @@ export interface SliderProps<T = HTMLDivElement> extends HTMLAttributes<T> {
   onSlideChange?: (slide: number) => void;
   setSlide?: (slide: number) => number;
   interval?: number;
-  container?: typeof React.Component;
   autoplay?: boolean;
   slidesAtOnce?: number;
   dots?: (
@@ -49,7 +49,6 @@ function Slider({
   setSlide: setSlideCustom = undefined,
   children,
   arrows,
-  container: CustomContainer,
   onSlideChange = () => undefined,
   dots,
   ...props
@@ -151,9 +150,9 @@ function Slider({
       </animated.div>
     ));
 
-  if (CustomContainer) {
-    return (
-      <CustomContainer ref={ref as any} {...(props as any)}>
+  return (
+    <Wrapper ref={ref as any}>
+      <Container>
         {left && (
           <LeftSliderControl onClick={previous}>{left}</LeftSliderControl>
         )}
@@ -162,17 +161,8 @@ function Slider({
         )}
         {render()}
         {dots && dots(slide, count(), previous, next)}
-      </CustomContainer>
-    );
-  }
-
-  return (
-    <Container ref={ref as any} {...(props as any)}>
-      {left && <LeftSliderControl onClick={previous}>{left}</LeftSliderControl>}
-      {right && <RightSliderControl onClick={next}>{right}</RightSliderControl>}
-      {render()}
-      {dots && dots(slide, count(), previous, next)}
-    </Container>
+      </Container>
+    </Wrapper>
   );
 }
 
