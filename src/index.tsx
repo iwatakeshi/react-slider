@@ -1,15 +1,16 @@
 import React, {
   Children,
-  forwardRef,
   HTMLAttributes,
   ReactNode,
   useEffect,
+  useRef,
   useState,
 } from 'react';
 import { useSprings, animated } from 'react-spring';
 import Container from './container';
 import { LeftSliderControl, RightSliderControl } from './control';
 import useGestureBinding from './hooks/use-gesture-binding';
+import useInterval from './hooks/use-interval';
 import Slide from './slide';
 
 export interface SliderProps<T = HTMLDivElement> extends HTMLAttributes<T> {
@@ -25,6 +26,7 @@ export interface SliderProps<T = HTMLDivElement> extends HTMLAttributes<T> {
   interval?: number;
   container?: typeof React.Component;
   autoplay?: boolean;
+  slidesAtOnce?: number;
   dots?: (
     index: number,
     length: number,
@@ -39,108 +41,99 @@ export interface SliderProps<T = HTMLDivElement> extends HTMLAttributes<T> {
  * Slider
  */
 
-const Slider = forwardRef<HTMLDivElement, SliderProps>(
-  (
-    {
-      interval = 1000,
-      autoplay = false,
-      index: activeIndex = 0,
-      setSlide: setSlideCustom = undefined,
-      children,
-      arrows,
-      container: CustomContainer,
-      onSlideChange = () => undefined,
-      dots,
-      ...props
+function Slider({
+  interval = 1000,
+  autoplay = false,
+  index: activeIndex = 0,
+  setSlide: setSlideCustom = undefined,
+  children,
+  arrows,
+  container: CustomContainer,
+  onSlideChange = () => undefined,
+  dots,
+  slidesAtOnce = 1,
+  ...props
+}: SliderProps) {
+  // Create an internal ref
+  const ref = useRef<HTMLDivElement>(null);
+  // Get the number of children
+  const count = () => Children.count(children);
+  // Set/Get the dragging state
+  const [dragging, setDragging] = useState(false);
+  // Set/Get the slide state
+  const [slide, _setSlide] = useState(0);
+
+  // Updates the slide state
+  const setSlide = setSlideCustom
+    ? (index: number) => _setSlide(setSlideCustom(index))
+    : _setSlide;
+
+  // Use react-spring
+  const [springProps, setSpringProps] = useSprings(count(), index => ({
+    offset: index,
+  }));
+
+  // Set the gesture bindings
+  const gestureBinds = useGestureBinding({
+    count: count() - 1,
+    dragging,
+    slide,
+    ref,
+    setDragging,
+    setSlide,
+    onClick(index) {
+      let childrenProps = _children[index]?.props?.children?.props;
+      if (childrenProps?.onClick) {
+        childrenProps.onClick();
+      }
     },
-    ref
-  ) => {
-    // Set/Get the dragging state
-    const [dragging, setDragging] = useState(false);
-    // Set/Get the slide state
-    const [slide, _setSlide] = useState(0);
+    setSpringProps,
+  });
 
-    // Updates the slide state
-    const setSlide = setSlideCustom
-      ? (index: number) => _setSlide(setSlideCustom(index))
-      : _setSlide;
+  // Triggered on slide change
+  useEffect(() => {
+    // see:  https://github.com/react-spring/react-spring/issues/861
+    // @ts-ignore
+    setSpringProps(index => ({
+      offset: index - slide,
+    }));
+    onSlideChange(slide);
+  }, [slide, setSpringProps, onSlideChange, dragging]);
 
-    const [springProps, setSpringProps] = useSprings(
-      Children.count(children),
-      index => ({
-        offset: index,
-      })
-    );
+  // Effect for autosliding
 
-    // Sets pointer events none to every child and preserves styles
-    const _children = Children.toArray(children).map((child, index) => (
-      <Slide key={index}>{child}</Slide> // eslint-disable-line react/no-array-index-key
-    ));
+  useInterval(
+    () => {
+      const targetIndex = (slide + 1) % count();
+      setSlide(targetIndex);
+    },
+    interval,
+    [autoplay, slide, children, count()],
+    autoplay
+  );
 
-    const gestureBinds = useGestureBinding({
-      count: Children.count(children) - 1,
-      dragging,
-      slide,
-      ref,
-      setDragging,
-      setSlide,
-      onClick(index) {
-        let childrenProps = _children[index]?.props?.children?.props;
-        if (childrenProps?.onClick) {
-          childrenProps.onClick();
-        }
-      },
-      setSpringProps,
-    });
+  // Jump to slide index when prop changes
+  useEffect(() => {
+    setSlide(activeIndex % count());
+  }, [activeIndex, children, count()]);
 
-    // Triggered on slide change
-    useEffect(() => {
-      // see:  https://github.com/react-spring/react-spring/issues/861
-      // @ts-ignore
-      setSpringProps(index => ({
-        offset: index - slide,
-      }));
-      onSlideChange(slide);
-    }, [slide, setSpringProps, onSlideChange]);
+  // Sets pointer events none to every child and preserves styles
+  const _children = Children.toArray(children).map((child, index) => (
+    <Slide key={index}>{child}</Slide> // eslint-disable-line react/no-array-index-key
+  ));
 
-    // Effect for autosliding
-    useEffect(() => {
-      let id: number;
+  const isStart = (index: number) => index === 0;
+  const isEnd = (index: number) => index === count() - 1;
 
-      if (autoplay && interval > 0) {
-        id = (setInterval(() => {
-          const targetIndex = (slide + 1) % Children.count(children);
-          setSlide(targetIndex);
-        }, interval) as unknown) as number;
-      }
+  const next = () => (isEnd(slide) ? setSlide(0) : setSlide(slide + 1));
+  const previous = () =>
+    isStart(slide) ? setSlide(count() - 1) : setSlide(slide - 1);
 
-      return () => {
-        if (id) clearInterval(id);
-      };
-    });
+  const left = arrows?.left,
+    right = arrows?.right;
 
-    const next = () => {
-      if (slide === Children.count(children) - 1) {
-        setSlide(0);
-        return;
-      }
-
-      setSlide(slide + 1);
-    };
-
-    const previous = () => {
-      if (slide === 0) {
-        setSlide(Children.count(children) - 1);
-        return;
-      }
-
-      setSlide(slide - 1);
-    };
-
-    const left = arrows?.left,
-      right = arrows?.right;
-
-    const renderable = springProps?.map(({ offset }, index) => (
+  const render = () =>
+    springProps.map(({ offset }, index) => (
       <animated.div
         {...gestureBinds()}
         key={index} // eslint-disable-line react/no-array-index-key
@@ -149,48 +142,38 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
             offsetX => `translate3d(${offsetX * 100}%, 0, 0)`
           ),
           position: 'absolute',
-          width: '100%',
+          width: `${100 / slidesAtOnce}%`,
           height: '100%',
           willChange: 'transform',
-          display: 'flex',
-          justifyContent: 'center',
-          justifyItems: 'center',
         }}
       >
         {_children[index]}
       </animated.div>
     ));
 
-    if (CustomContainer) {
-      return (
-        <CustomContainer ref={ref as any} {...(props as any)}>
-          {left && (
-            <LeftSliderControl onClick={previous}>{left}</LeftSliderControl>
-          )}
-          {right && (
-            <RightSliderControl onClick={next}>{right}</RightSliderControl>
-          )}
-          {renderable}
-          {dots && dots(slide, Children.count(children), previous, next)}
-        </CustomContainer>
-      );
-    }
-
+  if (CustomContainer) {
     return (
-      <Container ref={ref as any} {...(props as any)}>
+      <CustomContainer ref={ref as any} {...(props as any)}>
         {left && (
           <LeftSliderControl onClick={previous}>{left}</LeftSliderControl>
         )}
         {right && (
           <RightSliderControl onClick={next}>{right}</RightSliderControl>
         )}
-        {renderable}
-        {dots && dots(slide, Children.count(children), previous, next)}
-      </Container>
+        {render()}
+        {dots && dots(slide, count(), previous, next)}
+      </CustomContainer>
     );
   }
-);
 
-Slider.displayName = 'Slider';
+  return (
+    <Container ref={ref as any} {...(props as any)}>
+      {left && <LeftSliderControl onClick={previous}>{left}</LeftSliderControl>}
+      {right && <RightSliderControl onClick={next}>{right}</RightSliderControl>}
+      {render()}
+      {dots && dots(slide, count(), previous, next)}
+    </Container>
+  );
+}
 
 export default Slider;
