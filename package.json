@@ -11,6 +11,7 @@
   "engines": {
     "node": ">=10"
   },
+  "repository": "https://github.com/iwatakeshi/react-slider.git",
   "scripts": {
     "start": "tsdx watch",
     "dev": "tsdx watch",
@@ -24,7 +25,7 @@
     "build-storybook": "build-storybook"
   },
   "peerDependencies": {
-    "react": ">=16"
+    "react": ">=17"
   },
   "husky": {
     "hooks": {
@@ -38,7 +39,7 @@
     "trailingComma": "es5"
   },
   "name": "@iwatakeshi/react-slider",
-  "author": "Takeshi Iwana",
+  "author": "Takeshi Iwana <iwatakeshi@gmail.com>",
   "module": "dist/react-slider.esm.js",
   "size-limit": [
     {
