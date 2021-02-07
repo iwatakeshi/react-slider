@@ -52,7 +52,6 @@ function Slider({
   container: CustomContainer,
   onSlideChange = () => undefined,
   dots,
-  slidesAtOnce = 1,
   ...props
 }: SliderProps) {
   // Create an internal ref
@@ -76,6 +75,7 @@ function Slider({
 
   // Set the gesture bindings
   const gestureBinds = useGestureBinding({
+    count: count(),
     slidesAtOnce,
     dragging,
     slide,
@@ -102,7 +102,6 @@ function Slider({
   }, [slide, setSpringProps, onSlideChange]);
 
   // Effect for autosliding
-
   useInterval(
     () => {
       const targetIndex = (slide + 1) % count();
