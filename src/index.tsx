@@ -157,7 +157,7 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
           justifyItems: 'center',
         }}
       >
-        <Slide>{_children[index]}</Slide>
+        {_children[index]}
       </animated.div>
     ));
 
