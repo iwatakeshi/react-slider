@@ -1,9 +1,9 @@
-import { RefObject } from 'react';
+import { ForwardedRef } from 'react';
 import { useGesture } from 'react-use-gesture';
 import clamp from '../utils/clamp';
 
-export interface GuestureBinding<T> {
-  ref?: RefObject<T>;
+export interface GuestureBinding {
+  ref?: ForwardedRef<HTMLDivElement>;
   dragging: boolean;
   slide: number;
   count: number;
@@ -15,7 +15,7 @@ export interface GuestureBinding<T> {
 /**
  * Bindings to set on the element
  */
-export default function useGestureBinding<T = HTMLElement>({
+export default function useGestureBinding({
   count,
   slide,
   dragging,
@@ -24,7 +24,7 @@ export default function useGestureBinding<T = HTMLElement>({
   setSlide,
   onClick,
   setSpringProps,
-}: GuestureBinding<T>) {
+}: GuestureBinding) {
   return useGesture(
     {
       onDrag: ({
@@ -38,7 +38,7 @@ export default function useGestureBinding<T = HTMLElement>({
         if (first) {
           setDragging(true);
         }
-        let parentElement = (ref?.current as unknown) as HTMLElement;
+        let parentElement = ((ref as any)?.current as unknown) as HTMLElement;
         if (parentElement) {
           const { width } = parentElement.getBoundingClientRect();
 

@@ -4,7 +4,6 @@ import React, {
   HTMLAttributes,
   ReactNode,
   useEffect,
-  useRef,
   useState,
 } from 'react';
 import { useSprings, animated } from 'react-spring';
@@ -56,8 +55,6 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
     },
     ref
   ) => {
-    // Reference to the slider
-    const _ref = ref ?? useRef<HTMLDivElement>(null);
     // Set/Get the dragging state
     const [dragging, setDragging] = useState(false);
     // Set/Get the slide state
@@ -80,11 +77,11 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
       <Slide key={index}>{child}</Slide> // eslint-disable-line react/no-array-index-key
     ));
 
-    const gestureBinds = useGestureBinding<HTMLDivElement>({
+    const gestureBinds = useGestureBinding({
       count: Children.count(children) - 1,
       dragging,
       slide,
-      ref: _ref as any,
+      ref,
       setDragging,
       setSlide,
       onClick(index) {
@@ -120,7 +117,7 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
       return () => {
         if (id) clearInterval(id);
       };
-    }, []);
+    });
 
     const next = () => {
       if (slide === Children.count(children) - 1) {
@@ -166,7 +163,7 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
 
     if (CustomContainer) {
       return (
-        <CustomContainer ref={_ref as any} {...(props as any)}>
+        <CustomContainer ref={ref as any} {...(props as any)}>
           {left && (
             <LeftSliderControl onClick={previous}>{left}</LeftSliderControl>
           )}
@@ -180,7 +177,7 @@ const Slider = forwardRef<HTMLDivElement, SliderProps>(
     }
 
     return (
-      <Container ref={_ref as any} {...(props as any)}>
+      <Container ref={ref as any} {...(props as any)}>
         {left && (
           <LeftSliderControl onClick={previous}>{left}</LeftSliderControl>
         )}
