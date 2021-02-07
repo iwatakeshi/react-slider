@@ -45,6 +45,7 @@ function Slider({
   interval = 1000,
   autoplay = false,
   index: activeIndex = 0,
+  slidesAtOnce = 1,
   setSlide: setSlideCustom = undefined,
   children,
   arrows,
@@ -75,7 +76,7 @@ function Slider({
 
   // Set the gesture bindings
   const gestureBinds = useGestureBinding({
-    count: count() - 1,
+    slidesAtOnce,
     dragging,
     slide,
     ref,
