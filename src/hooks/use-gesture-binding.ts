@@ -1,9 +1,9 @@
-import { ForwardedRef } from 'react';
+import { RefObject } from 'react';
 import { useGesture } from 'react-use-gesture';
 import clamp from '../utils/clamp';
 
 export interface GuestureBinding {
-  ref?: ForwardedRef<HTMLDivElement>;
+  ref?: RefObject<HTMLDivElement>;
   dragging: boolean;
   slide: number;
   count: number;
@@ -11,6 +11,7 @@ export interface GuestureBinding {
   setSlide: (state: number) => void;
   onClick: (index: number) => void;
   setSpringProps: (index: number) => void;
+  slidesAtOnce: number;
 }
 /**
  * Bindings to set on the element
@@ -24,6 +25,7 @@ export default function useGestureBinding({
   setSlide,
   onClick,
   setSpringProps,
+  slidesAtOnce,
 }: GuestureBinding) {
   return useGesture(
     {
@@ -34,22 +36,34 @@ export default function useGestureBinding({
         distance,
         cancel,
         first,
+        active,
       }) => {
         if (first) {
           setDragging(true);
         }
-        let parentElement = ((ref as any)?.current as unknown) as HTMLElement;
-        if (parentElement) {
-          const { width } = parentElement.getBoundingClientRect();
+
+        if ((ref as any)?.current?.parentElement) {
+          const {
+            width,
+          } = (ref as any)?.current.parentElement.getBoundingClientRect();
 
           if (down && distance > width / 2) {
             if (cancel) cancel();
-            setSlide(clamp(slide + (xDirection > 0 ? -1 : 1), 0, count));
+            if (active) {
+              setSlide(
+                clamp(
+                  slide + (xDirection > 0 ? -1 : 1),
+                  0,
+                  count - slidesAtOnce
+                )
+              );
+            }
           }
+
           // see:  https://github.com/react-spring/react-spring/issues/861
           // @ts-ignore
           setSpringProps(index => ({
-            offset: (down ? xDelta : 0) / width + (index - slide),
+            offset: (active && down ? xDelta : 0) / width + (index - slide),
           }));
         }
       },
