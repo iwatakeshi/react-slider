@@ -5,6 +5,8 @@ const Slide = styled.div`
   height: 100%;
   will-change: transform;
   user-select: none;
+  pointer-events: none;
+  margin: auto 0;
 `;
 
 export default Slide;
