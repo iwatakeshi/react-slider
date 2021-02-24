@@ -12,7 +12,6 @@ import { LeftSliderControl, RightSliderControl } from './control';
 import useGestureBinding from './hooks/use-gesture-binding';
 import useInterval from './hooks/use-interval';
 import Slide from './slide';
-import Wrapper from './wrapper';
 
 export interface SliderProps<T = HTMLDivElement> extends HTMLAttributes<T> {
   /** The active index in the slider. */
@@ -118,7 +117,7 @@ function Slider({
 
   // Sets pointer events none to every child and preserves styles
   const _children = Children.toArray(children).map((child, index) => (
-    <Slide key={index}>{child}</Slide> // eslint-disable-line react/no-array-index-key
+    <Slide key={`slide-${index}`}>{child}</Slide> // eslint-disable-line react/no-array-index-key
   ));
 
   const isStart = (index: number) => index === 0;
@@ -151,18 +150,12 @@ function Slider({
     ));
 
   return (
-    <Wrapper ref={ref as any} {...props}>
-      <Container>
-        {left && (
-          <LeftSliderControl onClick={previous}>{left}</LeftSliderControl>
-        )}
-        {right && (
-          <RightSliderControl onClick={next}>{right}</RightSliderControl>
-        )}
-        {render()}
-        {dots && dots(slide, count(), previous, next)}
-      </Container>
-    </Wrapper>
+    <Container ref={ref as any} {...props}>
+      {left && <LeftSliderControl onClick={previous}>{left}</LeftSliderControl>}
+      {right && <RightSliderControl onClick={next}>{right}</RightSliderControl>}
+      {render()}
+      {dots && dots(slide, count(), previous, next)}
+    </Container>
   );
 }
 
