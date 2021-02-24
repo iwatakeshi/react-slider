@@ -5,9 +5,6 @@ const Slide = styled.div`
   height: 100%;
   will-change: transform;
   user-select: none;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 `;
 
 export default Slide;
