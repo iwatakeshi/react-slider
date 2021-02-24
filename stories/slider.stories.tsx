@@ -1,6 +1,14 @@
-import React from 'react';
+import React, { CSSProperties } from 'react';
 import { Meta, Story } from '@storybook/react';
 import Slider, { SliderProps } from '../src';
+import styled from '@emotion/styled';
+
+const Wrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+`;
 
 const meta: Meta = {
   title: 'Slider',
@@ -28,9 +36,15 @@ export default meta;
 
 const Template: Story<SliderProps> = args => (
   <Slider {...args}>
-    <h1>Hello</h1>
-    <h1>Hello2</h1>
-    <h1>Hello3</h1>
+    <Wrapper>
+      <h1>Hello</h1>
+    </Wrapper>
+    <Wrapper>
+      <h1>Hello 2</h1>
+    </Wrapper>
+    <Wrapper>
+      <h1>Hello 3</h1>
+    </Wrapper>
   </Slider>
 );
 
@@ -79,8 +93,11 @@ export const Default = Template.bind({});
 
 Default.args = {
   style: {
-    minHeight: '100px',
-  },
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+  } as CSSProperties,
   arrows,
 };
 
@@ -88,7 +105,7 @@ export const Dots = Template.bind({});
 
 Dots.args = {
   style: {
-    minHeight: '300px',
+    // minHeight: '300px',
   },
   arrows,
   dots: function(index) {
